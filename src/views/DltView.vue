@@ -1,9 +1,7 @@
-<script setup>
-
-</script>
+<script setup></script>
 
 <template>
   <main>
-    <h3>大乐透</h3>
+    <h3 class="prose prose-xl">大乐透</h3>
   </main>
 </template>
