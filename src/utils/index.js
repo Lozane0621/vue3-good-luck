@@ -1,4 +1,45 @@
+// 排列算法
+export function permutationGenerateArray(arr, r) {
+  const result = [];
+
+  function permute(current, remaining) {
+      if (current.length === r) {
+          result.push(current);
+      } else {
+          for (let i = 0; i < remaining.length; i++) {
+              let next = current.concat(remaining[i]);
+              let newRemaining = remaining.slice(0, i).concat(remaining.slice(i + 1));
+              permute(next, newRemaining);
+          }
+      }
+  }
+
+  permute([], arr);
+  return result;
+}
+
 // 组合算法
+export function combinationGenerateArray(arr, r) {
+  const result = [];
+
+  function combine(current, start) {
+      if (current.length === r) {
+          result.push(current);
+      } else {
+          for (let i = start; i < arr.length; i++) {
+              let next = current.concat(arr[i]);
+              combine(next, i + 1);
+          }
+      }
+  }
+
+  combine([], 0);
+  return result;
+}
+
+
+
+// 组合算法，计算组合数
 /**
  * C(n, r) = n! / r!(n - r)! 
  * @param {*} n 
@@ -51,9 +92,9 @@ export function calculateDLTCost(frontBallCount, backBallCount) {
 
 // 给定金额，计算彩票类型
 export function calculateLotteryType(cost) {
-  if (cost>=5000)return '大票'
-  if (cost>=2500 && cost<5000)return '中票'
-  if (cost>=0 && cost<2500)return '小票'
+  if (cost>=5000)return 'large'
+  if (cost>=2500 && cost<5000)return 'medium'
+  if (cost>=0 && cost<2500)return 'small'
 }
 
 
@@ -61,3 +102,4 @@ export function calculateLotteryType(cost) {
 export function countOccurrences(arr, num) {
   return arr.reduce((acc, cur) => cur === num ? acc + 1 : acc, 0)
 }
+

@@ -4,9 +4,26 @@
       <a-typography-title class="text-center"> 双色球选号指南 </a-typography-title>
     </a-typography>
     <a-row :gutter="24">
-      <a-col :span="12">
-        <a-typography-title :heading="4"> 原始数据展示 </a-typography-title>
-        <a-table :data="formatData" :pagination="{ 'show-page-size': true }">
+      <a-col :span="12" :xxl="12" :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
+        <div class="flex justify-between items-center">
+          <a-typography-title :heading="4"> 数据展示 </a-typography-title>
+          <a-upload
+            :auto-upload="false"
+            @change="onFileChange"
+            accept=".txt"
+            :show-file-list="false"
+          >
+            <template #upload-button>
+              <a-button type="outline">
+                <template #icon>
+                  <icon-upload />
+                </template>
+                上传txt文件
+              </a-button>
+            </template>
+          </a-upload>
+        </div>
+        <a-table :data="formatData" :pagination="{ 'show-page-size': true,'default-page-size':20 }">
           <template #columns>
             <a-table-column title="红球" data-index="redBall">
               <template #cell="{ record }">
@@ -42,13 +59,23 @@
                 defaultSortOrder: 'descend'
               }"
             ></a-table-column>
-            <a-table-column title="类型" data-index="type"></a-table-column>
+            <a-table-column title="类型" data-index="type">
+              <template #cell="{ record }">
+                <a-tag
+                  :color="
+                    record.type === 'large' ? 'red' : record.type === 'small' ? 'gray' : 'orangered'
+                  "
+                >
+                  {{ record.type === 'large' ? '大票' : record.type === 'small' ? '小票' : '中票' }}
+                </a-tag>
+              </template>
+            </a-table-column>
           </template>
         </a-table>
       </a-col>
-      <a-col :span="12">
+      <a-col :span="12" :xxl="12" :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
         <a-typography-title :heading="4"> 频率统计表 </a-typography-title>
-        <a-row class="grid-demo" :gutter="24">
+        <a-row :gutter="24">
           <a-col :span="12">
             <a-card title="红球频率（从大到小排列）">
               <a-table :data="frequency.redBall" :pagination="{ 'show-page-size': true }">
@@ -190,7 +217,7 @@
           </a-col>
         </a-row>
         <a-typography-title :heading="4"> 购买方案 </a-typography-title>
-        <a-table :columns="columns" :data="purchasePlan">
+        <a-table :columns="columns" :data="purchasePlan" :pagination="false">
           <template #number="{ record }">
             <a-input v-model="record.number" />
           </template>
@@ -201,13 +228,24 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { calculateSSQCost, calculateLotteryType, countOccurrences } from '@/utils'
-import txtData from './mock'
+import { IconUpload } from '@arco-design/web-vue/es/icon'
 const formatData = ref([])
-const frequency = ref({})
-const hotWarmCold = ref({})
+const frequency = ref({ redBall: [], blueBall: [] })
+const hotWarmCold = ref({
+  redBall: {
+    hot: [],
+    warm: [],
+    cold: []
+  },
+  blueBall: {
+    hot: [],
+    warm: [],
+    cold: []
+  }
+})
 
 const columns = [
   {
@@ -253,7 +291,7 @@ const purchasePlan = reactive([
 ])
 
 // 格式化元素数据
-const formatDataFromTxt = () => {
+const formatDataFromTxt = (txtData) => {
   const lines = txtData.trim().split('\n')
   const data = []
 
@@ -273,10 +311,9 @@ const formatDataFromTxt = () => {
     item.cost = calculateSSQCost(item.redBall.length, item.blueBall.length)
     item.type = calculateLotteryType(item.cost)
   })
-  console.log(data)
-
   formatData.value = data
 }
+
 // 统计号码出现频率
 const calculateFrequency = () => {
   const frequencyObject = {
@@ -324,8 +361,6 @@ const calculateFrequency = () => {
   frequencyObject.blueBall = frequencyObject.blueBall.sort((a, b) => b.count - a.count)
 
   frequency.value = frequencyObject
-
-  console.log(frequencyObject)
 }
 
 // 热号、温号、冷号分析
@@ -360,13 +395,19 @@ const numberAnalyse = () => {
   hotWarmColdObject.redBall = classifyNumbers(frequency.value.redBall, 8, 8)
   hotWarmColdObject.blueBall = classifyNumbers(frequency.value.blueBall, 4, 4)
   hotWarmCold.value = hotWarmColdObject
-  console.log(hotWarmColdObject)
 }
 
-onMounted(() => {
-  console.log('onMounted')
-  formatDataFromTxt()
-  calculateFrequency()
-  numberAnalyse()
-})
+// 读取文件
+const onFileChange = (fileList) => {
+  // 取最后一个文件
+  const info = fileList[fileList.length - 1]
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const data = e.target.result
+    formatDataFromTxt(data)
+    calculateFrequency()
+    numberAnalyse()
+  }
+  reader.readAsText(info.file)
+}
 </script>
