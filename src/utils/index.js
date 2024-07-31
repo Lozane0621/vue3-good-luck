@@ -84,7 +84,7 @@ export function calculateDLTCost(frontBallCount, backBallCount) {
   const frontCombos = combination(frontBallCount, 5);
   const backCombos = combination(backBallCount, 2);
   const totalCombinations = frontCombos * backCombos;
-  const totalCost = totalCombinations * 3; // 每注3元
+  const totalCost = totalCombinations * 2; // 每注3元
 
   return totalCost;
 }
