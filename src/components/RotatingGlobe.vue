@@ -48,7 +48,7 @@ function initGlobe() {
   // 创建地球材质
   const geometry = new THREE.SphereGeometry(1, 32, 32);
   const textureLoader = new THREE.TextureLoader();
-  const earthTexture = textureLoader.load('/images/earth_texture_night.jpg'); // 替换为实际的地球纹理图片路径
+  const earthTexture = textureLoader.load(import.meta.env.BASE_URL +'/images/earth_texture_night.jpg'); // 替换为实际的地球纹理图片路径
   const material = new THREE.MeshBasicMaterial({ map: earthTexture });
   sphere = new THREE.Mesh(geometry, material);
   scene.add(sphere);
