@@ -22,6 +22,11 @@ const router = createRouter({
       path: '/dlt',
       name: 'dlt',
       component: () => import('../views/DltView.vue')
+    },
+    {
+      path: '/ocr',
+      name: 'ocr',
+      component: () => import('../views/OcrView.vue')
     }
   ]
 })

@@ -23,7 +23,7 @@
             </template>
           </a-upload>
         </div>
-        <a-table :data="formatData" :pagination="{ 'show-page-size': true,'default-page-size':20 }">
+        <a-table :data="formatData" :pagination="{ 'show-page-size': true }">
           <template #columns>
             <a-table-column title="红球" data-index="redBall">
               <template #cell="{ record }">

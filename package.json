@@ -12,12 +12,16 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@egoist/tailwindcss-icons": "^1.8.1",
     "@headlessui/vue": "^1.7.22",
+    "@iconify-json/carbon": "^1.1.36",
+    "@iconify/tailwind": "^1.1.2",
     "@vueuse/core": "^10.11.0",
     "lodash": "^4.17.21",
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
     "tesseract.js": "^5.1.0",
+    "three": "^0.167.0",
     "uuid": "^10.0.0",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
