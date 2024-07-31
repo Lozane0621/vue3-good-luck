@@ -1,7 +1,4 @@
 /* eslint-disable no-undef */
-const fs = require('fs');
-const path = require('path');
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
@@ -27,15 +24,7 @@ export default defineConfig({
           sideEffect: true
         })
       ]
-    }),
-    {
-      name: '404-fallback',
-      writeBundle() {
-        const indexPath = path.resolve(__dirname, 'dist/index.html');
-        const errorPath = path.resolve(__dirname, 'dist/404.html');
-        fs.copyFileSync(indexPath, errorPath);
-      },
-    },
+    })
   ],
   resolve: {
     alias: {
