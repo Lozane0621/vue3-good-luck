@@ -1,0 +1,6 @@
+# Enable Jekyll
+jekyll: true
+
+# Exclude all files in 'docs' directory from being processed by Jekyll
+exclude:
+  - "dist/*"
