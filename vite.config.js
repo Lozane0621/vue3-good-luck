@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
-import { fileURLToPath, URL } from 'node:url'
+const fs = require('fs');
+const path = require('path');
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -30,8 +31,6 @@ export default defineConfig({
     {
       name: '404-fallback',
       writeBundle() {
-        const fs = require('fs');
-        const path = require('path');
         const indexPath = path.resolve(__dirname, 'dist/index.html');
         const errorPath = path.resolve(__dirname, 'dist/404.html');
         fs.copyFileSync(indexPath, errorPath);
