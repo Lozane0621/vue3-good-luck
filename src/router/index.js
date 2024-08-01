@@ -1,9 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory  } from 'vue-router'
 import NProgress from 'nprogress'; // progress bar
 import 'nprogress/nprogress.css';
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
@@ -27,6 +27,11 @@ const router = createRouter({
       path: '/ocr',
       name: 'ocr',
       component: () => import('../views/OcrView.vue')
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'notFound',
+      component: () => import('../views/404.vue'),
     }
   ]
 })
