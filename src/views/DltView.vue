@@ -7,23 +7,33 @@
       <a-col :span="12" :xxl="12" :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
         <div class="flex justify-between items-center">
           <a-typography-title :heading="4"> 数据展示 </a-typography-title>
-          <a-upload
-            :auto-upload="false"
-            @change="onFileChange"
-            accept=".txt"
-            :show-file-list="false"
-          >
-            <template #upload-button>
-              <a-button type="outline">
-                <template #icon>
-                  <icon-upload />
-                </template>
-                上传txt文件
-              </a-button>
-            </template>
-          </a-upload>
+          <div class="flex items-center space-x-2">
+            <div class="space-x-1">
+              <label for="">显示缺失号码</label>
+              <a-switch v-model="showMissing" />
+            </div>
+            <div class="space-x-1" v-if="showMissing">
+              <label for="">仅显示大票</label>
+              <a-switch v-model="showLargeMissing" />
+            </div>
+            <a-upload
+              :auto-upload="false"
+              @change="onFileChange"
+              accept=".txt"
+              :show-file-list="false"
+            >
+              <template #upload-button>
+                <a-button type="outline">
+                  <template #icon>
+                    <icon-upload />
+                  </template>
+                  上传txt文件
+                </a-button>
+              </template>
+            </a-upload>
+          </div>
         </div>
-        <a-table :data="formatData" :pagination="{ 'show-page-size': true }">
+        <a-table :data="formatData" :pagination="{ 'show-page-size': true }" :hoverable="false">
           <template #columns>
             <a-table-column title="前区号码" data-index="frontBall">
               <template #cell="{ record }">
@@ -34,6 +44,32 @@
                     class="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white text-sm m-1"
                   >
                     {{ item }}
+                  </div>
+                </div>
+                <div class="bg-neutral-50 p-2 mt-2 rounded border-dashed border" v-if="isShowMissing(record.type)">
+                  <div class="flex items-center">
+                    <div class="w-20">连号缺失：</div>
+                    <div class="flex flex-wrap grow">
+                      <div
+                        v-for="item in record.frontBallSerialNumberMissing"
+                        :key="item"
+                        class="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white text-sm m-1"
+                      >
+                        {{ item }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-20">剩余缺失：</div>
+                    <div class="flex flex-wrap grow">
+                      <div
+                        v-for="item in record.frontBallLeftMissing"
+                        :key="item"
+                        class="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white text-sm m-1"
+                      >
+                        {{ item }}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </template>
@@ -54,6 +90,7 @@
             <a-table-column
               title="金额"
               data-index="cost"
+              :width="100"
               :sortable="{
                 sortDirections: ['ascend', 'descend'],
                 defaultSortOrder: 'descend'
@@ -230,7 +267,13 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
-import { calculateDLTCost, calculateLotteryType, countOccurrences } from '@/utils'
+import {
+  calculateDLTCost,
+  calculateLotteryType,
+  countOccurrences,
+  generateDltFrontBallNumbers,
+  generateDltBackBallNumbers
+} from '@/utils'
 import { IconUpload } from '@arco-design/web-vue/es/icon'
 const formatData = ref([])
 const frequency = ref({ frontBall: [], backBall: [] })
@@ -246,6 +289,9 @@ const hotWarmCold = ref({
     cold: []
   }
 })
+
+const showMissing = ref(false)
+const showLargeMissing = ref(true)
 
 const columns = [
   {
@@ -297,8 +343,8 @@ const formatDataFromTxt = (txtData) => {
 
   // 每三行为一组数据
   for (let i = 0; i < lines.length; i += 3) {
-    const frontBall = lines[i].trim().split(' ')
-    const backBall = lines[i + 1].trim().split(' ')
+    const frontBall = lines[i].trim().split(' ').sort()
+    const backBall = lines[i + 1].trim().split(' ').sort()
     data.push({
       frontBall,
       backBall,
@@ -311,6 +357,26 @@ const formatDataFromTxt = (txtData) => {
     item.cost = calculateDLTCost(item.frontBall.length, item.backBall.length)
     item.type = calculateLotteryType(item.cost)
   })
+
+  // 前区连号缺失统计
+  data.forEach((item) => {
+    const { frontBall } = item
+    item.frontBallSerialNumberMissing = [] // 连续号码的缺失,如01,03,05中缺失的是02,04
+    item.frontBallLeftMissing = [] // 剩余缺失的号码，排除连号的缺失
+    for (let i = 0; i < frontBall.length - 1; i++) {
+      const current = Number(frontBall[i])
+      const next = Number(frontBall[i + 1])
+      if (next - current === 2) {
+        const middle = current + 1
+        item.frontBallSerialNumberMissing.push(middle < 10 ? `0${middle}` : `${middle}`)
+      }
+    }
+    // 剩余缺失的号码，排除连号的缺失
+    item.frontBallLeftMissing = generateDltFrontBallNumbers().filter((number) => {
+      return !frontBall.includes(number) && !item.frontBallSerialNumberMissing.includes(number)
+    })
+  })
+
   formatData.value = data
 }
 
@@ -322,26 +388,26 @@ const calculateFrequency = () => {
   }
 
   // 初始化前区号码数组
-  for (let i = 1; i <= 35; i++) {
-    frequencyObject.frontBall.push({
-      number: i < 10 ? `0${i}` : `${i}`,
+  frequencyObject.frontBall = generateDltFrontBallNumbers().map((item) => {
+    return {
+      number: item,
       count: 0
-    })
-  }
+    }
+  })
   // 初始化后区号码数组
-  for (let i = 1; i <= 12; i++) {
-    frequencyObject.backBall.push({
-      number: i < 10 ? `0${i}` : `${i}`,
+  frequencyObject.backBall = generateDltBackBallNumbers().map((item) => {
+    return {
+      number: item,
       count: 0
-    })
-  }
+    }
+  })
 
-  // 计算所有的前区号码
+  // 收集所有的前区号码
   const allfrontBall = formatData.value.reduce((acc, item) => {
     return acc.concat(item.frontBall)
   }, [])
 
-  // 计算所有的后区号码
+  // 收集所有的后区号码
   const allbackBall = formatData.value.reduce((acc, item) => {
     return acc.concat(item.backBall)
   }, [])
@@ -409,5 +475,17 @@ const onFileChange = (fileList) => {
     numberAnalyse()
   }
   reader.readAsText(info.file)
+}
+
+// 是否展示缺失号码
+const isShowMissing = (type) => {
+  
+  if (!showMissing.value) {
+    return false
+  }
+  if (showLargeMissing.value) {
+    return type === 'large'
+  }
+  return true
 }
 </script>

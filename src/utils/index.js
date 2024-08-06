@@ -92,8 +92,8 @@ export function calculateDLTCost(frontBallCount, backBallCount) {
 
 // 给定金额，计算彩票类型
 export function calculateLotteryType(cost) {
-  if (cost>=5000)return 'large'
-  if (cost>=2500 && cost<5000)return 'medium'
+  if (cost>=10000)return 'large'
+  if (cost>=2500 && cost<10000)return 'medium'
   if (cost>=0 && cost<2500)return 'small'
 }
 
@@ -102,4 +102,41 @@ export function calculateLotteryType(cost) {
 export function countOccurrences(arr, num) {
   return arr.reduce((acc, cur) => cur === num ? acc + 1 : acc, 0)
 }
+
+// 生成大乐透前区号码
+export function generateDltFrontBallNumbers() {
+  const numbers = []
+  for (let i = 1; i <= 35; i++) {
+    numbers.push(i < 10 ? `0${i}` : `${i}`)
+  }
+  return numbers
+}
+
+// 生成大乐透后区号码
+export function generateDltBackBallNumbers() {
+  const numbers = []
+  for (let i = 1; i <= 12; i++) {
+    numbers.push(i < 10 ? `0${i}` : `${i}`)
+  }
+  return numbers
+}
+
+// 生成双色球红球号码
+export function generateSsqRedBallNumbers() {
+  const numbers = []
+  for (let i = 1; i <= 33; i++) {
+    numbers.push(i < 10 ? `0${i}` : `${i}`)
+  }
+  return numbers
+}
+
+// 生成双色球蓝球号码
+export function generateSsqBlueBallNumbers() {
+  const numbers = []
+  for (let i = 1; i <= 16; i++) {
+    numbers.push(i < 10 ? `0${i}` : `${i}`)
+  }
+  return numbers
+}
+
 
